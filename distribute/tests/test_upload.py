@@ -48,7 +48,7 @@ class UserUploadPackageTest(DistributeBaseTest):
         r = app_api.create_token(token_obj)
         self.assert_status_201(r)
         token = r.json()['token']
-        r = anonymous_app_api.upload_package(file_path, token)
+        r = anonymous.upload_package(file_path, token)
         self.assert_status_201(r)
         package_id = r.json()['package_id']
 

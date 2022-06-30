@@ -30,8 +30,8 @@ class UserOrganizationSerializer(serializers.ModelSerializer):
     description = serializers.StringRelatedField(source='org.description', required=False, help_text='A short text describing the organization')
     visibility = ChoiceField(VisibilityType.choices, source='org.visibility')
     role = ChoiceField(choices=Role.choices, required=False)
-    update_time = serializers.ReadOnlyField(source='org.update_time')
-    create_time = serializers.ReadOnlyField(source='org.create_time')
+    update_time = serializers.DateTimeField(source='org.update_time')
+    create_time = serializers.DateTimeField(source='org.create_time')
     icon_file = serializers.SerializerMethodField()
 
     def get_icon_file(self, obj):

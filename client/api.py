@@ -1,3 +1,5 @@
+import random, string
+from django.core import mail
 from client.client import BaseClient
 from util.image import generate_random_image
 
@@ -15,22 +17,15 @@ class Api:
             self.username = username
 
         def force_login_or_register(self, username):
-            password = username + '@password'
-            user = {
-                'username': username,
-                'password': password
-            }
-            r = self.login(user)
-            if r.status_code != 200:
-                self.register(user)
+            user = self.client.login_or_create(username)
+            self.username = username
+            self.client.set_username(username)
 
         def register(self, user):
-            r = self.client.post('/user/register', user)
-            if r.status_code == 201:
-                self.username = r.json()['username']
-                self.client.set_username(self.username)
-                self.client.set_token(r.json()['token'])
-            return r
+            return self.client.post('/user/register', user)
+
+        def confirm_register(self, code):
+            return self.client.post('/user/register/verify_email', {'key': code})
 
         def login(self, user):
             r = self.client.post('/user/login', user)
@@ -62,8 +57,9 @@ class Api:
 
         def change_password(self, password, new_password):
             payload = {
-                'password': password,
-                'new_password': new_password
+                'old_password': password,
+                'new_password1': new_password,
+                'new_password2': new_password
             }
             return self.client.post('/user/password/change', payload)
 
@@ -71,23 +67,31 @@ class Api:
             payload = {
                 'email': email
             }
-            return self.client.post('/user/password/request_reset', payload)
-
-        def reset_password(self, code, password):
-            payload = {
-                'code': code,
-                'password': password
-            }
             return self.client.post('/user/password/reset', payload)
+
+        def reset_password(self, username, token, password):
+            payload = {
+                'username': username,
+                'token': token,
+                'new_password1': password,
+                'new_password2': password
+            }
+            return self.client.post('/user/password/reset/confirm', payload)
 
         def request_verify_email(self):
             return self.client.post('/user/email/request_verify')
 
-        def verify_email(self, code):
+        def resend_register_email(self, email):
             payload = {
-                'code': code
+                'email': email
             }
-            return self.client.post('/user/email/verify', payload)
+            return self.client.post('/user/register/resend_email', payload)
+
+        def verify_register_email(self, code):
+            payload = {
+                'key': code
+            }
+            return self.client.post('/user/register/verify_email', payload)
 
         def get_user(self, username):
             return self.client.get('/users/' + username)
@@ -259,11 +263,11 @@ class Api:
         def remove_member(self, username):
             return self.client.delete(self.base_path + '/members/' + username)
 
-        def upload_package(self, file_path, token=None):
+        def upload_package(self, file_path):
             with open(file_path, 'rb') as fp:
                 data = {'file': fp}
                 url = self.base_path + '/packages/upload_via_file'
-                return self.client.upload_post(url, data=data, token=token)
+                return self.client.upload_post(url, data=data)
 
         def get_package_list(self, page=1, per_page=10):
             query = {
@@ -361,3 +365,8 @@ class Api:
     def get_swagger(self):
         return self.client.get('/docs/swagger.json')
 
+    def upload_package(self, file_path, token):
+        with open(file_path, 'rb') as fp:
+            data = {'file': fp}
+            url = '/upload/file'
+            return self.client.upload_post(url, data=data, token=token)

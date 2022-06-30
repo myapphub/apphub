@@ -1,5 +1,8 @@
 from django.conf import settings
 
+def build_static_uri(path):
+    return settings.STATIC_URL + path
+
 def build_absolute_uri(path):
     if path.startswith('https://') or path.startswith('http://'):
         return path

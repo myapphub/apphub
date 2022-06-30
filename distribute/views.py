@@ -163,7 +163,7 @@ class OrganizationAppPackageList(UserAppPackageList):
 
 
 class UserAppPackageUpload(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly | UploadPackagePermission]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_namespace(self, namespace):
         return Namespace.user(namespace)
@@ -230,13 +230,7 @@ class UserAppPackageUpload(APIView):
         commit_id = serializer.validated_data.get('commit_id', '')
         description = serializer.validated_data.get('description', '')
         app = self.check_and_get_app(request, namespace, path)
-        uploader = None
-        if request.user.is_authenticated:
-            uploader = request.user
-        elif request.token:
-            uploader = request.token
-
-        instance = self.create_package(uploader, app, file, commit_id, description)
+        instance = self.create_package(request.user, app, file, commit_id, description)
 
         context = {
             'plist_url_name': self.plist_url_name(),
@@ -258,6 +252,54 @@ class OrganizationAppPackageUpload(UserAppPackageUpload):
 
     def plist_url_name(self):
         return 'org-app-package-plist'
+
+class TokenAppPackageUpload(UserAppPackageUpload):
+
+    permission_classes = [UploadPackagePermission]
+
+    def get_namespace(self, app):
+        if app.owner:
+            return Namespace.user(app.owner.username)
+        elif app.org:
+            return Namespace.organization(app.org.path)
+        else:
+            return None
+
+    def url_name(self, app):
+        if app.owner:
+            return 'user-app-package'
+        elif app.org:
+            return 'org-app-package'
+        return ''
+
+    def plist_url_name(self, app):
+        if app.owner:
+            return 'user-app-package-plist'
+        elif app.org:
+            return 'org-app-package-plist'
+        return ''
+
+    def post(self, request):
+        serializer = UploadPackageSerializer(data=request.data)
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
+        app = request.token.app
+        file = serializer.validated_data['file']
+        commit_id = serializer.validated_data.get('commit_id', '')
+        description = serializer.validated_data.get('description', '')
+        instance = self.create_package(request.token, app, file, commit_id, description)
+
+        context = {
+            'plist_url_name': self.plist_url_name(app),
+            'namespace': self.get_namespace(app).path,
+            'path': app.path
+        }
+        serializer = PackageSerializer(instance, context=context)
+        response = Response(serializer.data, status=status.HTTP_201_CREATED)
+        location = reverse(self.url_name(app), args=(self.get_namespace(app).path, app.path, instance.package_id))
+        response['Location'] = build_absolute_uri(location)
+        return response
+    
 
 class AliyunOssUploadPackageCallback(UserAppPackageUpload):
     permission_classes = [permissions.AllowAny]

@@ -1,5 +1,7 @@
-import shutil
+import shutil, random, string
 from django.test import TestCase, override_settings
+from django.core import mail
+from client.api import Api
 
 
 @override_settings(MEDIA_ROOT='var/media/test')
@@ -7,6 +9,9 @@ class BaseTestCase(TestCase):
 
     def setUp(self):
         shutil.rmtree('var/media/test', ignore_errors=True)
+
+    def get_random_email(self):
+        return ''.join(random.choices(string.ascii_letters, k=6)) + '@example.com'
 
     def get_message(self, resp):
         try:
@@ -65,8 +70,22 @@ class BaseTestCase(TestCase):
             dict22[key] = dict2.get(key, '')
         self.assertDictEqual(dict11, dict22)
 
+    def login_or_create(self, api, user):
+        r = api.get_user_api().register(user)
+        self.assert_status_201(r)
+        code = self.get_email_verify_code(mail.outbox[-1].body)
+        r = api.get_user_api().confirm_register(code)
+        self.assert_status_200(r)
+        login_req = {'username': user['username'], 'password': user['password1']}
+        r = api.get_user_api().login(login_req)
+        self.assert_status_200(r)
+        return r
+
     def get_resp_list(self, r):
         return r.json()
+
+    def get_email_verify_code(self, s):
+        return s[s.find('verify_email/')+len('verify_email/'):s.find('verify_email/')+53+len('verify_email/')]
 
     def google_org(self, visibility='Public'):
         return {

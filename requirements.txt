@@ -4,3 +4,5 @@ requests
 coverage
 Pillow
 androguard
+dj-rest-auth[with_social]
+django-rest-auth

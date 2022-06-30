@@ -3,10 +3,13 @@ from client.client import BaseClient
 
 
 class RequestsClient(BaseClient):
-    def __init__(self, base_url='https://appcenter.libms.top/debug/api/'):
+    def __init__(self, base_url=''):
         self.base_url = base_url
         self.token = ''
         self.username = ''
+
+    def login_or_create(self, username):
+        pass
 
     def set_token(self, token):
         self.token = token

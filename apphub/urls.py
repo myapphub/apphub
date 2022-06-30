@@ -66,8 +66,36 @@ urlpatterns = [
     path('users/<namespace>/apps/<path>/releases', UserAppReleaseList.as_view()),
     path('users/<namespace>/apps/<path>/releases/<int:release_id>', UserAppReleaseDetail.as_view()),
     path('users/<namespace>/apps/<path>/stores/vivo', UserStoreAppVivo.as_view()),
-    path('docs/swagger.json', SwaggerJsonView.as_view())
+    path('upload/file', TokenAppPackageUpload.as_view()),
+    path('docs/swagger.json', SwaggerJsonView.as_view()),
+    path('system/', include('system.urls')),
 ]
+
+if settings.ENABLE_EMAIL_ACCOUNT:
+    from dj_rest_auth.registration.views import RegisterView, VerifyEmailView, ResendEmailVerificationView
+    from dj_rest_auth.views import PasswordResetView, PasswordResetConfirmView, PasswordChangeView
+    from user.views import AppHubLoginView
+    urlpatterns.append(path('user/register', RegisterView.as_view()))
+    urlpatterns.append(path('user/register/verify_email', VerifyEmailView.as_view(), name='rest_verify_email'))
+    urlpatterns.append(path('user/register/resend_email', ResendEmailVerificationView.as_view(), name='rest_resend_email'))
+    urlpatterns.append(path('user/login', AppHubLoginView.as_view(), name='rest_login'))
+    urlpatterns.append(path('user/password/reset', PasswordResetView.as_view(), name='rest_password_reset'))
+    urlpatterns.append(path('user/password/reset/confirm', PasswordResetConfirmView.as_view(), name='rest_password_reset_confirm'))
+    urlpatterns.append(path('user/password/change', PasswordChangeView.as_view(), name='rest_password_change'))
+if settings.SOCIAL_ACCOUNT_LIST:
+    if 'feishu' in settings.SOCIAL_ACCOUNT_LIST:
+        from user.integration.feishu import FeishuLogin, FeishuConnect
+        urlpatterns.append(path('user/feishu/login', FeishuLogin.as_view(), name='feishu_login'))
+        urlpatterns.append(path('user/feishu/connect', FeishuConnect.as_view(), name='feishu_connect'))
+    if 'slack' in settings.SOCIAL_ACCOUNT_LIST:
+        from user.integration.slack import SlackLogin, SlackConnect
+        urlpatterns.append(path('user/slack/login', SlackLogin.as_view(), name='slack_login'))
+        urlpatterns.append(path('user/slack/connect', SlackConnect.as_view(), name='slack_connect'))
+    if 'dingtalk' in settings.SOCIAL_ACCOUNT_LIST:
+        from user.integration.dingtalk import DingtalkLogin, DingtalkConnect
+        urlpatterns.append(path('user/dingtalk/login', DingtalkLogin.as_view(), name='dingtalk_login'))
+        urlpatterns.append(path('user/dingtalk/connect', DingtalkConnect.as_view(), name='dingtalk_connect'))
+
 
 if settings.DEFAULT_FILE_STORAGE == 'storage.NginxFileStorage.NginxPrivateFileStorage':
     from storage.NginxFileStorage import nginx_media

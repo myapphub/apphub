@@ -17,6 +17,7 @@ class OrganizationPermissionTest(BaseTestCase):
 
         bill: Api = Api(UnitTestClient(), 'BillGates', True)
         r = bill.get_user_api().get_visible_org_list()
+        self.assert_status_200(r)
         self.assert_list_length(r, 2)
 
         anonymous: Api = Api(UnitTestClient())

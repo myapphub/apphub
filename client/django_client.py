@@ -1,13 +1,23 @@
 from django.test import Client
+from django.contrib.auth import get_user_model
+from django.conf import settings
 from client.client import BaseClient
 
+UserModel = get_user_model()
 
 class DjangoTestClient(BaseClient):
     def __init__(self, base_url=''):
-        self.base_url = base_url# + '/api'
+        self.base_url = base_url
+        if settings.API_URL_PREFIX:
+            self.base_url += '/' + settings.API_URL_PREFIX
         self.token = ''
         self.username = ''
         self.client = Client()
+
+    def login_or_create(self, username):
+        user, created = UserModel.objects.get_or_create(username=username)
+        self.client.force_login(user)
+        return user
 
     def set_token(self, token):
         if token is not None:
@@ -24,6 +34,8 @@ class DjangoTestClient(BaseClient):
         return self.base_url + path
 
     def get_or_head_file(self, path, query=None):
+        if path.startswith(settings.EXTERNAL_API_URL):
+            path = path[len(settings.EXTERNAL_API_URL):]
         return self.client.head(self.build_url(path), data=query, HTTP_AUTHORIZATION=self.token)
 
     def get(self, path, query=None):

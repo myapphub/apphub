@@ -17,36 +17,39 @@ class UserLoginTest(BaseTestCase):
 
     def register(self, user):
         api: Api = Api(UnitTestClient())
-        r = api.get_user_api().register(user)
-        self.assert_status_201(r)
+        self.login_or_create(api, user)
 
     def test_login_success(self):
         user = {
             'username': 'BillGates',
-            'password': 'BillGates@password'
+            'password1': 'BillGates@password',
+            'password2': 'BillGates@password',
+            'email': self.get_random_email()
         }
         self.register(user)
-        self.assert_login_success({'account': 'BillGates', 'password': 'BillGates@password'})
+        self.assert_login_success({'username': 'BillGates', 'password': 'BillGates@password'})
 
     def test_login_failure(self):
         user = {
             'username': 'BillGates',
-            'password': 'BillGates@password'
+            'password1': 'BillGates@password',
+            'password2': 'BillGates@password',
+            'email': self.get_random_email()
         }
         self.register(user)
         users = [
             {
-                'account': 'BillGates',
+                'username': 'BillGates',
                 'password': 'BillGates@passwordxx'
             }, {
-                'account': 'BillGates3',
+                'username': 'BillGates3',
                 'password': 'BillGates@password'
             }, {
-                'account': 'BillGates',
+                'username': 'BillGates',
             }, {
                 'password': 'BillGates@password'
             }, {
-                'email': 'BillGates@example.com',
+                'email': self.get_random_email(),
                 'password': 'BillGates@passwordxx'
             }
         ]
@@ -56,13 +59,15 @@ class UserLoginTest(BaseTestCase):
     def test_logout(self):
         user = {
             'username': 'BillGates',
-            'password': 'BillGates@password'
+            'password1': 'BillGates@password',
+            'password2': 'BillGates@password',
+            'email': self.get_random_email()
         }
         self.register(user)
         api: Api = Api(UnitTestClient())
-        r = api.get_user_api().login({'account': 'BillGates', 'password': 'BillGates@password'})
+        r = api.get_user_api().login({'username': 'BillGates', 'password': 'BillGates@password'})
 
         r = api.get_user_api().logout()
-        self.assert_status_204(r)
+        self.assert_status_200(r)
         r = api.get_user_api().me()
         self.assert_status_401(r)
