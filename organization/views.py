@@ -122,6 +122,17 @@ class OrganizationList(APIView):
         response['Location'] = build_absolute_uri(location)
         return response
 
+class AuthenticatedUserOrganizationList(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        username = request.user.username;
+        page, per_page = get_pagination_params(request)
+        orgs = OrganizationUser.objects.filter(user=request.user, org__owner__username=username).prefetch_related('org')
+        data = UserOrganizationSerializer(orgs, many=True).data
+        headers = {'X-Total-Count': len(data)}
+        return Response(data[(page - 1) * per_page: page * per_page], headers=headers)
+
 class OrganizationDetail(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 

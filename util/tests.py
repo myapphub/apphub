@@ -8,6 +8,7 @@ from client.api import Api
 class BaseTestCase(TestCase):
 
     def setUp(self):
+        self.maxDiff = None
         shutil.rmtree('var/media/test', ignore_errors=True)
 
     def get_random_email(self):

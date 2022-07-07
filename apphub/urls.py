@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import include, path, re_path
 from django.conf import settings
 from user.views import MeUser, user_info
-from organization.views import OrganizationList
+from organization.views import AuthenticatedUserOrganizationList, OrganizationList
 from application.views import *
 from distribute.views import *
 from documentation.views import *
@@ -25,6 +25,7 @@ from documentation.views import *
 urlpatterns = [
     path('user', MeUser.as_view()),
     path('user/apps', AuthenticatedUserApplicationList.as_view()),
+    path('user/orgs', AuthenticatedUserOrganizationList.as_view()),
     path('user/', include('user.urls')),
     path('users/<username>', user_info),
     path('download/<slug>', SlugAppDetail.as_view()),

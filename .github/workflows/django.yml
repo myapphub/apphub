@@ -25,6 +25,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install coverage
     - name: Run Tests
       run: |
         coverage run --source='.' --omit='manage.py,apphub/asgi.py,apphub/wsgi.py,client/client.py,client/request_client.py,distribute/stores/base.py,distribute/package_parser/base.py' manage.py test
