@@ -1,12 +1,16 @@
-from django.conf import settings
-from django.http import HttpResponseRedirect
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from django.conf import settings
+from django.http import HttpResponseRedirect
+
 
 class AppHubAccountAdapter(DefaultAccountAdapter):
-
     def get_email_confirmation_url(self, request, emailconfirmation):
-        return settings.EXTERNAL_WEB_URL + '/user/register/verify_email/' + emailconfirmation.key
+        return (
+            settings.EXTERNAL_WEB_URL
+            + "/user/register/verify_email/"
+            + emailconfirmation.key
+        )
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):
         activate_url = self.get_email_confirmation_url(request, emailconfirmation)
@@ -28,8 +32,8 @@ class AppHubAccountAdapter(DefaultAccountAdapter):
     def get_signup_redirect_url(self, request):
         return settings.EXTERNAL_WEB_URL
 
-class AppHubSoialAccountAdapter(DefaultSocialAccountAdapter):
 
+class AppHubSoialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         request.new_user = not sociallogin.is_existing
         return super().pre_social_login(request, sociallogin)
@@ -37,6 +41,6 @@ class AppHubSoialAccountAdapter(DefaultSocialAccountAdapter):
     def is_auto_signup_allowed(self, request, sociallogin):
         ret = super().is_auto_signup_allowed(request, sociallogin)
         if not ret:
-            sociallogin.user.email = ''
+            sociallogin.user.email = ""
             sociallogin.email_addresses = []
         return True

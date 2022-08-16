@@ -34,7 +34,7 @@
       "name": "distribute"
     },
     {
-      "name": "workflow"
+      "name": "store"
     }
   ],
   "paths": {
@@ -305,7 +305,7 @@
                 },
                 "description": "my avatar"
               }
-            }        
+            }
           },
           "400": {
             "description": "invalid input, object invalid"
@@ -6350,6 +6350,182 @@
           }
         }
       }
+    },
+    "/stores/appstore/{country_code_alpha2}/{appstore_app_id}": {
+      "get": {
+        "tags": [
+          "store"
+        ],
+        "summary": "Get appstore app info",
+        "parameters": [
+          {
+            "name": "country_code_alpha2",
+            "in": "path",
+            "description": "ISO 3166-1 alpha-2 https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appstore_app_id",
+            "in": "path",
+            "description": "appstore_app_id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "appstore app info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreCurrent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stores/vivo/{vivo_store_app_id}": {
+      "get": {
+        "tags": [
+          "store"
+        ],
+        "summary": "Get vivo store app info",
+        "parameters": [
+          {
+            "name": "vivo_store_app_id",
+            "in": "path",
+            "description": "vivo_store_app_id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "app info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreCurrent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stores/huawei": {
+      "get": {
+        "tags": [
+          "store"
+        ],
+        "summary": "Get huawei store app info",
+        "parameters": [
+          {
+            "name": "store_url",
+            "in": "query",
+            "description": "store_url",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "app info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreCurrent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stores/xiaomi/{xiaomi_store_app_id}": {
+      "get": {
+        "tags": [
+          "store"
+        ],
+        "summary": "Get xiaomi store app info",
+        "parameters": [
+          {
+            "name": "xiaomi_store_app_id",
+            "in": "path",
+            "description": "xiaomi_store_app_id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "app info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreCurrent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stores/yingyongbao": {
+      "get": {
+        "tags": [
+          "store"
+        ],
+        "summary": "Get yingyongbao store app info",
+        "parameters": [
+          {
+            "name": "bundle_identifier",
+            "in": "query",
+            "description": "bundle_identifier",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "app info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreCurrent"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7343,6 +7519,21 @@
               "Developer",
               "Tester"
             ]
+          }
+        }
+      },
+      "StoreCurrent": {
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string",
+            "format": "url"
+          },
+          "name": {
+            "type": "integer"
+          },
+          "version": {
+            "type": "string"
           }
         }
       },

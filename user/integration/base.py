@@ -1,16 +1,16 @@
+from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework import status
 from rest_framework.response import Response
-from dj_rest_auth.registration.views import SocialLoginView
+
 from user.serializers import UserSerializer
 
 
 class BaseSocialLoginView(SocialLoginView):
-
     def get_response(self):
         if self.token:
             response_serializer = UserSerializer(self.user)
             response_data = response_serializer.data
-            response_data['token'] = self.token.key
+            response_data["token"] = self.token.key
             return Response(response_data, status=status.HTTP_200_OK)
         return super().get_response()
 
@@ -40,7 +40,9 @@ class BaseSocialLoginView(SocialLoginView):
             basic_auth=adapter.basic_auth,
         )
         data = {
-            'url': client.get_redirect_url(adapter.authorize_url, self.authorize_extra_params())
+            "url": client.get_redirect_url(
+                adapter.authorize_url, self.authorize_extra_params()
+            )
         }
         return Response(data)
 
@@ -49,10 +51,11 @@ class BaseSocialLoginView(SocialLoginView):
         response = super().post(request, *args, **kwargs)
         try:
             from django.http import HttpRequest
+
             if not isinstance(request, HttpRequest):
                 request = request._request
-            response.data['new_user'] = request.new_user
-        except:
-            response.data['new_user'] = False
+            response.data["new_user"] = request.new_user
+        except:  # noqa: E722
+            response.data["new_user"] = False
 
         return response
