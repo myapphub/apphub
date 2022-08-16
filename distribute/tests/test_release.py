@@ -48,10 +48,15 @@ class UserReleaseTest(DistributeBaseTest):
         r2 = app_api.get_release_list()
         self.assert_status_200(r2)
         self.assert_list_length(r2, 1)
-        self.assertDictEqual(r.json(), r2.json()[0])
+        self.assert_dict_equal_except(
+            r.json(), r2.json()[0], ["package_file", "icon_file"]
+        )
+
         r = app_api.get_one_release(release_id)
         self.assert_status_200(r)
-        self.assertDictEqual(r.json(), r2.json()[0])
+        self.assert_dict_equal_except(
+            r.json(), r2.json()[0], ["package_file", "icon_file"]
+        )
         # self.assert_release_file_permission(release_id)
 
         r = app_api.create_release(release)

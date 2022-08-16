@@ -7,7 +7,7 @@
 [![Django CI](https://github.com/myapphub/apphub/actions/workflows/django.yml/badge.svg)](https://github.com/myapphub/apphub/actions/workflows/django.yml)
 [![codecov](https://codecov.io/gh/myapphub/apphub/branch/main/graph/badge.svg?token=JbvDW07tsh)](https://codecov.io/gh/myapphub/apphub)
 
-🙋‍♀️ A self-hosted service that helps you distribute Android, iOS, macOS, tvOS, Linux, Windows apps, you can release builds to testers and public app stores.
+🙋‍♀️ AppHub is a self-hosted service that helps you distribute Android, iOS, macOS, tvOS, Linux, Windows apps, you can release builds to testers and public app stores.
 
 ## Features
 
