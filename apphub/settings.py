@@ -124,7 +124,7 @@ WSGI_APPLICATION = "apphub.wsgi.application"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES_ENGINE = get_env_value(
-    "DEFAULT_SDATABASES_ENGINE", default="django.db.backends.sqlite3"
+    "DATABASES_ENGINE", default="django.db.backends.sqlite3"
 )
 DATABASES = {
     "default": {
@@ -172,11 +172,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
 
-if DEBUG:
-    DEFAULT_RENDERER_CLASSES = DEFAULT_RENDERER_CLASSES + (
-        "rest_framework.renderers.BrowsableAPIRenderer",
-    )
-
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
@@ -209,23 +204,26 @@ STATICFILES_STORAGE = get_env_value(
     "STATICFILES_STORAGE", "django.contrib.staticfiles.storage.StaticFilesStorage"
 )
 # DEFAULT_FILE_STORAGE = get_env_value('DEFAULT_FILE_STORAGE', 'django.core.files.storage.FileSystemStorage') # noqa: E501
-DEFAULT_FILE_STORAGE = get_env_value(
-    "DEFAULT_FILE_STORAGE", "storage.NginxFileStorage.NginxPrivateFileStorage"
-)
+
+STORAGE_TYPE = get_env_value('STORAGE_TYPE', 'LocalFileSystem')
+STORAGE_MAP = {
+    "LocalFileSystem": "storage.NginxFileStorage.NginxPrivateFileStorage",
+    "AlibabaCloudOSS": "storage.AliyunOssStorage.AliyunOssMediaStorage",
+    "AmazonAWSS3": "storages.backends.s3boto3.S3Boto3Storage"
+}
+
+DEFAULT_FILE_STORAGE = STORAGE_MAP.get(STORAGE_TYPE, "storage.NginxFileStorage.NginxPrivateFileStorage")  # noqa: E501
 
 
-if (
-    STATICFILES_STORAGE == "storage.AliyunOssStorage.AliyunOssStaticStorage"
-    or DEFAULT_FILE_STORAGE == "storage.AliyunOssStorage.AliyunOssMediaStorage"
-):
+if DEFAULT_FILE_STORAGE == "storage.AliyunOssStorage.AliyunOssMediaStorage":
     ALIYUN_OSS_ACCESS_KEY_ID = get_env_value("ALIYUN_OSS_ACCESS_KEY_ID")
     ALIYUN_OSS_ACCESS_KEY_SECRET = get_env_value("ALIYUN_OSS_ACCESS_KEY_SECRET")
     ALIYUN_OSS_BUCKET_NAME = get_env_value("ALIYUN_OSS_BUCKET_NAME")
     ALIYUN_OSS_ENDPOINT = get_env_value("ALIYUN_OSS_ENDPOINT")
-    ALIYUN_OSS_PUBLIC_URL = get_env_value("ALIYUN_OSS_PUBLIC_URL", ALIYUN_OSS_ENDPOINT)
     ALIYUN_OSS_KEY_PREFIX = get_env_value("ALIYUN_OSS_KEY_PREFIX", "")
     ALIYUN_OSS_ROLE_ARN = get_env_value("ALIYUN_OSS_ROLE_ARN")
     ALIYUN_OSS_REGION_ID = get_env_value("ALIYUN_OSS_REGION_ID")
+    ALIYUN_OSS_PUBLIC_READ = get_env_value("ALIYUN_OSS_PUBLIC_READ", False)
 
 
 # Static files (CSS, JavaScript, Images)

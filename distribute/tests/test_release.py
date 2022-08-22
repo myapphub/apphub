@@ -51,7 +51,6 @@ class UserReleaseTest(DistributeBaseTest):
         self.assert_dict_equal_except(
             r.json(), r2.json()[0], ["package_file", "icon_file"]
         )
-
         r = app_api.get_one_release(release_id)
         self.assert_status_200(r)
         self.assert_dict_equal_except(

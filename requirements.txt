@@ -6,3 +6,4 @@ androguard
 dj-rest-auth[with_social]
 django-rest-auth
 oss2
+# mysqlclient

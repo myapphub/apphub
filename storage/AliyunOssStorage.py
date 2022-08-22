@@ -4,6 +4,7 @@ import posixpath
 import shutil
 import tempfile
 from datetime import datetime
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.core.files import File
@@ -41,14 +42,6 @@ def _to_posix_path(name):
 @deconstructible
 class AliyunOssStorage(Storage):
     def __init__(self):
-        self.access_key_id = settings.ALIYUN_OSS_ACCESS_KEY_ID
-        self.access_key_secret = settings.ALIYUN_OSS_ACCESS_KEY_SECRET
-        self.end_point = settings.ALIYUN_OSS_ENDPOINT
-        self.public_url = settings.ALIYUN_OSS_PUBLIC_URL
-        self.bucket_name = settings.ALIYUN_OSS_BUCKET_NAME
-        self.key_prefix = settings.ALIYUN_OSS_KEY_PREFIX
-        self.role_arn = settings.ALIYUN_OSS_ROLE_ARN
-        self.region_id = settings.ALIYUN_OSS_REGION_ID
         self.auth = oss2.AuthV2(self.access_key_id, self.access_key_secret)
         endpoint_is_cname = False if self.end_point.endswith(".aliyuncs.com") else True
         self.bucket = oss2.Bucket(
@@ -86,11 +79,16 @@ class AliyunOssStorage(Storage):
 
     def _save(self, name, content):
         target_name = self._get_key_name(name)
+        headers = None
+        if self.public_read:
+            headers = {
+                'x-oss-object-acl': oss2.OBJECT_ACL_PUBLIC_READ
+            }
         if isinstance(content, AliyunOssFile):
-            self.bucket.copy_object(self.bucket_name, content.name, target_name)
+            self.bucket.copy_object(self.bucket_name, content.name, target_name, headers=headers)  # noqa: E501
         else:
             content.file.seek(0)
-            self.bucket.put_object(target_name, content.file)
+            self.bucket.put_object(target_name, content.file, headers=headers)
         return os.path.normpath(name)
 
     def delete(self, name):
@@ -130,6 +128,8 @@ class AliyunOssStorage(Storage):
 
     def url(self, name):
         name = self._get_key_name(name)
+        if self.public_read:
+            return os.path.join(self.public_url, name)
         return self.bucket_url.sign_url("GET", name, 60 * 60 * 24, slash_safe=True)
 
     def _datetime_from_timestamp(self, ts):
@@ -193,4 +193,14 @@ class AliyunOssStorage(Storage):
 
 @deconstructible
 class AliyunOssMediaStorage(AliyunOssStorage):
-    pass
+    def __init__(self):
+        self.access_key_id = settings.ALIYUN_OSS_ACCESS_KEY_ID
+        self.access_key_secret = settings.ALIYUN_OSS_ACCESS_KEY_SECRET
+        self.end_point = settings.ALIYUN_OSS_ENDPOINT
+        self.public_url = urlparse(settings.MEDIA_URL).scheme + '://' + urlparse(settings.MEDIA_URL).hostname  # noqa: E501
+        self.bucket_name = settings.ALIYUN_OSS_BUCKET_NAME
+        self.public_read = settings.ALIYUN_OSS_PUBLIC_READ
+        self.key_prefix = settings.MEDIA_ROOT
+        self.role_arn = settings.ALIYUN_OSS_ROLE_ARN
+        self.region_id = settings.ALIYUN_OSS_REGION_ID
+        super().__init__()
