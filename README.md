@@ -68,7 +68,7 @@
 git clone https://github.com/myapphub/apphub.git
 cd apphub
 pip install -r requirements.txt
-uwsgi --module=apphub.wsgi:application --socket=localhost:8000
+uwsgi --ini apphub.uwsgi.ini
 ```
 
 ### With dashboard

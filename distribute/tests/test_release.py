@@ -81,24 +81,6 @@ class UserReleaseTest(DistributeBaseTest):
         r = app_api.get_one_release(release_id)
         self.assert_status_404(r)
 
-    def test_vivo_store(self):
-        app = self.chrome_app()
-        r = self.release_app(app)
-        # release_id = r["release_id"]
-        auth_data = {
-            "access_key": "test_access_key",
-            "access_secret": "test_access_secret",
-            "vivo_store_app_id": "test_vivo_store_app_id",
-            "store_app_link": "https://apphub.libms.top/mock/store/vivo",
-        }
-        r = self.app_api.create_vivo_store(auth_data)
-        self.assert_status_201(r)
-        r2 = self.app_api.get_vivo_store()
-        self.assert_status_200(r2)
-        self.assertDictEqual(r.json(), r2.json())
-        # r = self.app_api.submit_store(release_id, '', 'Vivo')
-        # self.assert_status_201(r)
-
 
 class OrganizationReleaseTest(UserReleaseTest):
     def kind(self):

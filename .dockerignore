@@ -1,0 +1,5 @@
+.git
+.github
+apphub/local_settings.py
+var
+db.sqlite3
