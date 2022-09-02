@@ -35,7 +35,7 @@ def handler(environ, start_response):
     ret = application(environ, start_response)
 
     if (
-        os.environ.get("SDATABASES_ENGINE", None)
+        os.environ.get("DATABASES_ENGINE", None)
         == "django.db.backends.sqlite3"
         and environ.get("REQUEST_METHOD", "") != "GET"
     ):

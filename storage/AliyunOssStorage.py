@@ -1,7 +1,9 @@
 import json
 import os.path
 import posixpath
+import random
 import shutil
+import string
 import tempfile
 from datetime import datetime
 from urllib.parse import urlparse
@@ -18,6 +20,8 @@ try:
     from aliyunsdksts.request.v20150401 import AssumeRoleRequest
 except:  # noqa: E722
     pass
+
+from util.url import get_file_extension
 
 
 class AliyunOssFile(File):
@@ -146,10 +150,33 @@ class AliyunOssStorage(Storage):
 
     get_created_time = get_accessed_time = get_modified_time
 
+    def request_upload_url(self, slug, filename):
+        ext = get_file_extension(filename, "zip")
+        name = str(timezone.make_aware(timezone.make_naive(timezone.now())))[:19]  # noqa: E501
+        suffix = "".join(random.choices(string.ascii_letters, k=4))
+        name = name.replace(' ', 'T').replace(':', '-') + '-' + suffix + '.' + ext  # noqa: E501
+        name = os.path.join("temp/upload", slug, name)
+        object_name = os.path.join(self.key_prefix, name)
+        expire_seconds = 60 * 60
+        url = self.bucket.sign_url('PUT', object_name, expire_seconds, slash_safe=True)
+        return {
+            "upload_url": url,
+            "file": name,
+            "expire_seconds": expire_seconds
+        }
+
     def request_upload(
-        self, file_name, description, commit_id, callback_url, slug, uploader
+        self,
+        filename,
+        description,
+        commit_id,
+        build_type,
+        channel,
+        callback_url,
+        slug,
+        uploader
     ):
-        key_prefix = self.key_prefix + "temp/upload/" + slug + "/" + uploader + "/"
+        key_prefix = os.path.join(self.key_prefix, "temp/upload", slug, uploader) + "/"
         resource = "acs:oss:*:*:" + self.bucket_name + "/" + key_prefix + "*"
         policy = {
             "Version": "1",
@@ -170,14 +197,22 @@ class AliyunOssStorage(Storage):
         body = clt.do_action_with_exception(req)
         token = json.loads(oss2.to_unicode(body))
         description = description.replace('"', '\\"')
+        str_list = [
+            '{"object":${object}, "description":"',
+            description,
+            '","commit_id":"',
+            commit_id,
+            '","build_type":"',
+            build_type,
+            '", "channel": "',
+            channel,
+            '"}'
+        ]
+        callback_body = "".join(str_list)
         ret = {
             "callback": {
                 "callback_url": callback_url,
-                "callback_body": '{"object":${object},"description":"'
-                + description
-                + '","commit_id":"'
-                + commit_id
-                + '"}',
+                "callback_body": callback_body,
                 "callback_body_type": "application/json",
             },
             "access_key_id": token["Credentials"]["AccessKeyId"],

@@ -44,6 +44,7 @@ def current(request):
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])
 def backup(request):
+    data = {}
     if settings.DATABASES_ENGINE == "django.db.backends.sqlite3":
         database_name = settings.DATABASES["default"]["NAME"]
         access_key_id = settings.ALIYUN_OSS_ACCESS_KEY_ID
@@ -53,15 +54,34 @@ def backup(request):
         auth = oss2.AuthV2(access_key_id, access_key_secret)
         endpoint_is_cname = False if end_point.endswith(".aliyuncs.com") else True
         bucket = oss2.Bucket(auth, end_point, bucket_name, is_cname=endpoint_is_cname)
-        remote_db_file = str(database_name)
-        if remote_db_file.startswith("/"):
-            remote_db_file = remote_db_file[1:]
+        prefix = ''
         if settings.MEDIA_ROOT:
             prefix = settings.MEDIA_ROOT
             if prefix.startswith("/"):
                 prefix = prefix[1:]
-            remote_db_file = os.path.join(prefix, remote_db_file)
+        name = str(timezone.make_aware(timezone.make_naive(timezone.now())))[:16] + '_db.sqlite3'  # noqa: E501
+        remote_db_file = os.path.join(prefix, 'backup', name.replace(' ', 'T'))
         if database_name and os.path.isfile(database_name):
-            bucket.put_object_from_file(remote_db_file, database_name)
+            try:
+                data['upload'] = True
+            except:  # noqa: E722
+                pass
+            headers = {
+                'x-oss-object-acl': oss2.OBJECT_ACL_PUBLIC_READ
+            }
+            ret = bucket.put_object_from_file(
+                remote_db_file,
+                database_name,
+                headers=headers)
+            try:
+                data['ret'] = ret.status
+                # data['headers'] = ret.headers
+            except:  # noqa: E722
+                pass
+        try:
+            data['remote_db_file'] = remote_db_file
+            data['database_name'] = str(database_name)
+        except:  # noqa: E722
+            pass
 
-    return Response({})
+    return Response(data)
