@@ -269,21 +269,6 @@ if settings.DEFAULT_FILE_STORAGE == "storage.NginxFileStorage.NginxPrivateFileSt
     urlpatterns.append(
         re_path(r"^file/(?P<file>([^/]+/).*)$", nginx_media, name="file")
     )
-elif settings.DEFAULT_FILE_STORAGE == "storage.AliyunOssStorage.AliyunOssMediaStorage":
-    urlpatterns.append(
-        path(
-            "aliyun/oss/callback/<uploader_type>/<uploader_name>/<slug>",
-            AliyunOssUploadPackageCallback.as_view(),
-            name="aliyun-oss-callback",
-        )
-    )
-    urlpatterns.append(
-        path(
-            "aliyun/oss/request_upload/<slug>",
-            AliyunOssRequestUploadPackage.as_view(),
-            name="aliyun-oss-request-upload",
-        )
-    )
 
 
 if len(settings.API_URL_PREFIX) > 0:

@@ -40,14 +40,14 @@
     - [ ] Gitlab
     - [ ] Github
 - [ ] Multiple storage options
-    - [ ] Amazon AWS S3
+    - [x] Amazon AWS S3
     - [ ] Azure Blob Storage
     - [ ] Google Cloud Storage
     - [x] Alibaba Cloud OSS
     - [ ] Tencent COS
 - [ ] Multiple deploy options
     - [x] Manual
-    - [ ] Docker
+    - [x] Docker
     - [ ] Amazon AWS Lambda
     - [ ] Azure serverless
     - [ ] Google App Engine

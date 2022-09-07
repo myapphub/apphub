@@ -1,6 +1,7 @@
 from datetime import timedelta
 from urllib.parse import unquote
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -17,10 +18,8 @@ from application.permissions import (Namespace, UploadPackagePermission,
                                      check_app_download_permission,
                                      check_app_manager_permission,
                                      check_app_upload_permission,
-                                     check_app_view_permission, get_app,
-                                     get_slug_app)
+                                     check_app_view_permission, get_app)
 from application.serializers import UniversalAppSerializer
-from application.views import UserModel
 from distribute.models import (FileUploadRecord, Package, Release, StoreApp,
                                StoreAppVersionRecord)
 from distribute.package_parser import parser
@@ -34,7 +33,6 @@ from distribute.serializers import (PackageSerializer, PackageUpdateSerializer,
                                     StoreAppVivoAuthSerializer,
                                     StoreAppXiaomiStoreAuthSerializer,
                                     StoreAppYingyongbaoStoreAuthSerializer,
-                                    UploadAliyunOssPackageSerializer,
                                     UploadPackageSerializer)
 from distribute.stores.app_store import AppStore
 from distribute.stores.base import StoreType
@@ -398,137 +396,6 @@ class TokenAppPackageUpload(UserAppPackageUpload):
         return response
 
 
-class AliyunOssUploadPackageCallback(UserAppPackageUpload):
-    permission_classes = [permissions.AllowAny]
-
-    def url_name(self):
-        if self.app.owner:
-            return "user-app-package"
-        elif self.app.org:
-            return "org-app-package"
-        else:
-            return ""
-
-    def plist_url_name(self):
-        if self.app.owner:
-            return "user-app-package-plist"
-        elif self.app.org:
-            return "org-app-package-plist"
-        else:
-            return ""
-
-    def get_uploader(self, type, uploader, app=None):
-        if type == "user":
-            return UserModel.objects.get(username=uploader)
-        elif type == "token":
-            # todo: more than one AppAPIToken have the same name and app
-            return AppAPIToken.objects.get(name=uploader, app=app)
-        else:
-            raise PermissionDenied
-
-    def post(self, request, uploader_type, uploader_name, slug):
-        # todo
-        serializer = UploadAliyunOssPackageSerializer(data=request.data)
-        if not serializer.is_valid():
-            raise serializers.ValidationError(serializer.errors)
-        app = get_slug_app(slug)
-        self.app = app
-        namespace = ""
-        if app.owner:
-            namespace = app.owner.username
-        elif app.org:
-            namespace = app.org.path
-        path = app.path
-
-        file = default_storage.open(serializer.validated_data["object"])
-        commit_id = serializer.validated_data.get("commit_id", "")
-        description = serializer.validated_data.get("description", "")
-        build_type = serializer.validated_data.get("build_type", "Debug")
-        channel = serializer.validated_data.get("channel", "")
-        uploader = self.get_uploader(uploader_type, uploader_name, app)
-        instance = create_package(
-            uploader, app, file, commit_id, description, channel, build_type
-        )
-
-        context = {
-            "plist_url_name": self.plist_url_name(),
-            "namespace": namespace,
-            "path": path,
-        }
-        serializer = PackageSerializer(instance, context=context)
-        response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        location = reverse(self.url_name(), args=(namespace, path, instance.package_id))
-        response["Location"] = build_absolute_uri(location)
-        return response
-
-
-class AliyunOssRequestUploadPackage(APIView):
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly | UploadPackagePermission
-    ]
-
-    def get_namespace(self, app, namespace):
-        if app.owner:
-            return Namespace.user(namespace)
-        elif app.org:
-            return Namespace.organization(namespace)
-        else:
-            return None
-
-    def check_app(self, request, app):
-        namespace = ""
-        if app.owner:
-            namespace = app.owner.username
-        elif app.org:
-            namespace = app.org.path
-        path = app.path
-
-        if request.user.is_authenticated:
-            app, role = check_app_upload_permission(
-                request.user, path, self.get_namespace(app, namespace)
-            )
-            return app
-        else:
-            self.check_object_permissions(request, app)
-            return app
-
-    def post(self, request, slug):
-        serializer = RequestUploadPackageSerializer(data=request.data)
-        if not serializer.is_valid():
-            raise serializers.ValidationError(serializer.errors)
-        filename = serializer.validated_data["filename"]
-        description = serializer.validated_data.get("description", "")
-        commit_id = serializer.validated_data.get("commit_id", "")
-        build_type = serializer.validated_data.get("build_type", "Debug")
-        channel = serializer.validated_data.get("channel", "")
-        app = get_slug_app(slug)
-        self.check_app(request, app)
-        uploader_type = ""
-        uploader_name = ""
-        if request.user.is_authenticated:
-            uploader_type = "user"
-            uploader_name = request.user.username
-        elif request.token:
-            uploader_type = "token"
-            uploader_name = request.token.name
-        response = Response()
-        location = reverse(
-            "aliyun-oss-callback", args=(uploader_type, uploader_name, slug)
-        )
-        callback_url = build_absolute_uri(location)
-        response.data = default_storage.request_upload(
-            filename,
-            description,
-            commit_id,
-            build_type,
-            channel,
-            callback_url,
-            slug,
-            uploader_name
-        )
-        return response
-
-
 class RequestUploadPackage(APIView):
     permission_classes = [UploadPackagePermission]
 
@@ -559,6 +426,7 @@ class RequestUploadPackage(APIView):
             data=data
         )
         ret["record_id"] = instance.id
+        ret["storage"] = settings.STORAGE_TYPE
         return Response(ret)
 
 

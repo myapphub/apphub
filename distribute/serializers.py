@@ -120,7 +120,7 @@ class PackageSerializer(serializers.ModelSerializer):
 class PackageUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Package
-        fields = ["description", "commit_id"]
+        fields = ["description", "commit_id", "channel", "build_type"]
 
 
 class UploadPackageSerializer(serializers.Serializer):

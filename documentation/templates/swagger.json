@@ -3110,7 +3110,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RequestPackageUpdateRequest"
+                "$ref": "#/components/schemas/RequestPackageUploadRequest"
               }
             }
           }
@@ -3121,7 +3121,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestPackageUpdateResponse"
+                  "$ref": "#/components/schemas/RequestPackageUploadResponse"
                 }
               }
             }
@@ -5524,56 +5524,6 @@
         }
       }
     },
-    "/aliyun/oss/request_upload/{slug}": {
-      "post": {
-        "tags": [
-          "distribute"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Aliyun oss request upload",
-        "parameters": [
-          {
-            "name": "slug",
-            "in": "path",
-            "description": "The app's install slug",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RequestUploadPackage"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "the aliyun oss upload data response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AliyunUploadToken"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/stores/appstore/{country_code_alpha2}/{appstore_app_id}": {
       "get": {
         "tags": [
@@ -6366,7 +6316,7 @@
           }
         }
       },
-      "RequestPackageUpdateRequest": {
+      "RequestPackageUploadRequest": {
         "type": "object",
         "properties": {
           "filename": {
@@ -6391,7 +6341,7 @@
           }
         }
       },
-      "RequestPackageUpdateResponse": {
+      "RequestPackageUploadResponse": {
         "type": "object",
         "properties": {
           "url": {
@@ -6402,72 +6352,20 @@
           }
         }
       },
-      "RequestUploadPackage": {
+      "PackageUpdateRequest": {
         "type": "object",
         "properties": {
-          "filename": {
+          "description": {
             "type": "string"
           },
-          "description": {
+          "channel": {
+            "type": "string"
+          },
+          "build_type": {
             "type": "string"
           },
           "commit_id": {
             "type": "string"
-          }
-        }
-      },
-      "AliyunOSSCallback": {
-        "type": "object",
-        "properties": {
-          "object": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "commit_id": {
-            "type": "string"
-          }
-        }
-      },
-      "AliyunUploadToken": {
-        "type": "object",
-        "properties": {
-          "access_key_id": {
-            "type": "string"
-          },
-          "access_key_secret": {
-            "type": "string"
-          },
-          "security_token": {
-            "type": "string"
-          },
-          "endpoint": {
-            "type": "string"
-          },
-          "bucket": {
-            "type": "string"
-          },
-          "key_prefix": {
-            "type": "string"
-          },
-          "is_cname": {
-            "type": "boolean"
-          },
-          "callback": {
-            "type": "object",
-            "properties": {
-              "callback_url": {
-                "type": "string",
-                "format": "url"
-              },
-              "callback_body": {
-                "type": "string"
-              },
-              "callback_body_type": {
-                "type": "string"
-              }
-            }
           }
         }
       },
