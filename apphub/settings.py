@@ -290,6 +290,14 @@ if SOCIAL_ACCOUNT_LIST:
                 "secret": get_env_value("WECOM_APP_SECRET", ""),
             },
             "agent_id": get_env_value("WECOM_AGENT_ID", ""),
+        },
+        "custom_github": {
+            "display_name": get_env_value("GITHUB_DISPLAY_NAME", "github"),
+            "SCOPE": ["openid"],
+            "APP": {
+                "client_id": get_env_value("GITHUB_CLIENT_ID", ""),
+                "secret": get_env_value("GITHUB_CLIENT_SECRET", ""),
+            },
         }
     }
 

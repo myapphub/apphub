@@ -37,7 +37,7 @@
     - [x] Feishu(Lark)
     - [x] DingTalk
     - [x] Wecom
-    - [ ] Gitlab
+    - [x] Gitlab
     - [ ] Github
 - [ ] Multiple storage options
     - [x] Amazon AWS S3
@@ -80,6 +80,12 @@ Have a question or an issue about AppHub? Create an [issue](https://github.com/m
 
 Interested in contributing to AppHub? Click here to join our [Slack](https://join.slack.com/t/apphubhq/shared_invite/zt-1e7q6xcqc-8N61BMQUeCPwh3TrJvfRSw).
 
+## Credits
+
+Inspired by
+- [App Center](http://appcenter.ms/)
+- [Zealot](https://github.com/tryzealot/zealot)
+- [蒲公英](https://www.pgyer.com/)
 
 ## License
 

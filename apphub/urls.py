@@ -274,6 +274,19 @@ if settings.SOCIAL_ACCOUNT_LIST:
                 name="wecom_connect",
             )
         )
+    if "github" in settings.SOCIAL_ACCOUNT_LIST:
+        from user.integration.github import GitHubConnect, GitHubLogin
+
+        urlpatterns.append(
+            path("user/github/login", GitHubLogin.as_view(), name="github_login")
+        )
+        urlpatterns.append(
+            path(
+                "user/github/connect",
+                GitHubConnect.as_view(),
+                name="github_connect",
+            )
+        )
 
 
 if settings.DEFAULT_FILE_STORAGE == "storage.NginxFileStorage.NginxPrivateFileStorage":
