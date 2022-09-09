@@ -104,7 +104,7 @@ class DingtalkLogin(BaseSocialLoginView):
     def register_provider(self):
         providers.registry.register(CustomDingTalkProvider)
 
-    def authorize_extra_params(self):
+    def authorize_extra_params(self, provider):
         return {"prompt": "consent"}
 
 

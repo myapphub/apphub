@@ -261,6 +261,19 @@ if settings.SOCIAL_ACCOUNT_LIST:
                 name="dingtalk_connect",
             )
         )
+    if "wecom" in settings.SOCIAL_ACCOUNT_LIST:
+        from user.integration.wecom import WecomConnect, WecomLogin
+
+        urlpatterns.append(
+            path("user/wecom/login", WecomLogin.as_view(), name="wecom_login")
+        )
+        urlpatterns.append(
+            path(
+                "user/wecom/connect",
+                WecomConnect.as_view(),
+                name="wecom_connect",
+            )
+        )
 
 
 if settings.DEFAULT_FILE_STORAGE == "storage.NginxFileStorage.NginxPrivateFileStorage":

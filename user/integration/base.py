@@ -17,7 +17,7 @@ class BaseSocialLoginView(SocialLoginView):
     def register_provider(self):
         pass
 
-    def authorize_extra_params(self):
+    def authorize_extra_params(self, provider):
         return {}
 
     def get(self, request):
@@ -41,7 +41,7 @@ class BaseSocialLoginView(SocialLoginView):
         )
         data = {
             "url": client.get_redirect_url(
-                adapter.authorize_url, self.authorize_extra_params()
+                adapter.authorize_url, self.authorize_extra_params(provider)
             )
         }
         return Response(data)

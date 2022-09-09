@@ -35,8 +35,8 @@
     - [x] Slack
     - [ ] Microsoft Teams
     - [x] Feishu(Lark)
-    - [ ] DingTalk
-    - [ ] Wecom
+    - [x] DingTalk
+    - [x] Wecom
     - [ ] Gitlab
     - [ ] Github
 - [ ] Multiple storage options

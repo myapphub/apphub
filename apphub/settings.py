@@ -49,6 +49,7 @@ SECRET_KEY = get_env_value(
 # **8)csv5u^3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env_value("DEBUG_MODE", default=False)
+DEBUG = True
 
 EXTERNAL_WEB_URL = get_env_value("EXTERNAL_WEB_URL", default="http://localhost:8000")
 
@@ -241,6 +242,8 @@ elif DEFAULT_FILE_STORAGE == "storage.AWSS3Storage.AWSS3MediaStorage":
     if AWS_STORAGE_PUBLIC_READ:
         AWS_DEFAULT_ACL = "public-read"
     AWS_LOCATION = MEDIA_ROOT
+    if not urlparse(MEDIA_URL).hostname.endswith(".s3.amazonaws.com"):
+        AWS_S3_CUSTOM_DOMAIN = urlparse(MEDIA_URL).hostname
 
 
 # Default primary key field type
@@ -275,10 +278,19 @@ if SOCIAL_ACCOUNT_LIST:
             "display_name": get_env_value("DINGTALK_DISPLAY_NAME", "dingtalk"),
             "SCOPE": ["openid"],
             "APP": {
-                "client_id": get_env_value("DING_TALK_APP_KEY", ""),
-                "secret": get_env_value("DING_TALK_APP_SECRET", ""),
+                "client_id": get_env_value("DINGTALK_APP_KEY", ""),
+                "secret": get_env_value("DINGTALK_APP_SECRET", ""),
             },
         },
+        "custom_wecom": {
+            "display_name": get_env_value("WECOM_DISPLAY_NAME", "wecom"),
+            "SCOPE": ["snsapi_privateinfo"],
+            "APP": {
+                "client_id": get_env_value("WECOM_CORP_ID", ""),
+                "secret": get_env_value("WECOM_APP_SECRET", ""),
+            },
+            "agent_id": get_env_value("WECOM_AGENT_ID", ""),
+        }
     }
 
 ACCOUNT_ADAPTER = "user.adapter.AppHubAccountAdapter"
