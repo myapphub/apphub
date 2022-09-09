@@ -287,6 +287,19 @@ if settings.SOCIAL_ACCOUNT_LIST:
                 name="github_connect",
             )
         )
+    if "gitlab" in settings.SOCIAL_ACCOUNT_LIST:
+        from user.integration.gitlab import GitLabConnect, GitLabLogin
+
+        urlpatterns.append(
+            path("user/gitlab/login", GitLabLogin.as_view(), name="gitlab_login")
+        )
+        urlpatterns.append(
+            path(
+                "user/gitlab/connect",
+                GitLabConnect.as_view(),
+                name="gitlab_connect",
+            )
+        )
 
 
 if settings.DEFAULT_FILE_STORAGE == "storage.NginxFileStorage.NginxPrivateFileStorage":

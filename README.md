@@ -37,8 +37,8 @@
     - [x] Feishu(Lark)
     - [x] DingTalk
     - [x] Wecom
-    - [x] Gitlab
-    - [ ] Github
+    - [x] GitLab
+    - [x] GitHub
 - [ ] Multiple storage options
     - [x] Amazon AWS S3
     - [ ] Azure Blob Storage

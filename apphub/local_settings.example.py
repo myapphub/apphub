@@ -109,6 +109,10 @@
 # GITHUB_CLIENT_ID = ''
 # GITHUB_CLIENT_SECRET = ''
 
+# GITLAB_CLIENT_ID = ''
+# GITLAB_CLIENT_SECRET = ''
+# GITLAB_URL = 'https://gitlab.com'
+
 
 # Default: 'LocalFileSystem'
 # Default file storage class to be used for any file-related operations that don’t specify a particular storage system. # noqa: E501

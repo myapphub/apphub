@@ -298,6 +298,15 @@ if SOCIAL_ACCOUNT_LIST:
                 "client_id": get_env_value("GITHUB_CLIENT_ID", ""),
                 "secret": get_env_value("GITHUB_CLIENT_SECRET", ""),
             },
+        },
+        "custom_gitlab": {
+            "display_name": get_env_value("GITLAB_DISPLAY_NAME", "gitlab"),
+            "SCOPE": ["openid", "read_api", "read_user"],
+            "APP": {
+                "client_id": get_env_value("GITLAB_CLIENT_ID", ""),
+                "secret": get_env_value("GITLAB_CLIENT_SECRET", ""),
+            },
+            "GITLAB_URL": get_env_value("GITLAB_URL", "https://gitlab.com")
         }
     }
 
