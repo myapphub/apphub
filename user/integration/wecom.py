@@ -7,6 +7,7 @@ from allauth.socialaccount.providers.oauth2.provider import OAuth2Provider
 from allauth.socialaccount.providers.oauth2.views import OAuth2Adapter
 from dj_rest_auth.registration.views import SocialConnectView
 from django.conf import settings
+from django.core.cache import cache
 from django.utils.http import urlencode
 
 from user.integration.base import BaseSocialLoginView
@@ -66,6 +67,14 @@ class WecomOAuth2Client(OAuth2Client):
             return "%s?%s" % (authorization_url, urlencode(params))
 
     def get_access_token(self, code):
+        token_cache_key = "wecom_access_token"
+        wecom_access_token = cache.get(token_cache_key)
+        if wecom_access_token:
+            return {
+                "access_token": wecom_access_token["access_token"],
+                "expires_in": wecom_access_token["expires_in"],
+                "code": code
+            }
         # TODO: cache token
         data = {
             "corpid": self.consumer_key,
@@ -78,6 +87,7 @@ class WecomOAuth2Client(OAuth2Client):
         access_token = resp.json()
         if not access_token or "access_token" not in access_token:
             raise OAuth2Error("Error retrieving access token: %s" % resp.content)
+        cache.set(token_cache_key, access_token, access_token["expires_in"])
         return {
             "access_token": access_token["access_token"],
             "expires_in": access_token["expires_in"],
@@ -101,7 +111,12 @@ class CustomWecomOAuth2Adapter(OAuth2Adapter):
         resp.raise_for_status()
         extra_data = resp.json()
         if extra_data.get("errcode", 0) != 0:
+            errcode = extra_data.get("errcode", 0)
+            if errcode == 42001 or errcode == 40014:
+                token_cache_key = "wecom_access_token"
+                cache.delete(token_cache_key)
             raise OAuth2Error("Error retrieving code: %s" % resp.content)
+
         user_ticket = extra_data.get("user_ticket", "")
         if user_ticket:
             params2 = {

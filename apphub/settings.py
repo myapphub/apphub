@@ -49,7 +49,6 @@ SECRET_KEY = get_env_value(
 # **8)csv5u^3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env_value("DEBUG_MODE", default=False)
-DEBUG = True
 
 EXTERNAL_WEB_URL = get_env_value("EXTERNAL_WEB_URL", default="http://localhost:8000")
 
@@ -142,6 +141,8 @@ else:
     DATABASES["default"]["PORT"] = get_env_value("DATABASE_PORT")
     DATABASES["default"]["USER"] = get_env_value("DATABASE_USER")
     DATABASES["default"]["PASSWORD"] = get_env_value("DATABASE_PASSWORD")
+
+KEY_PREFIX = "apphub_"
 
 # Email
 EMAIL_HOST = get_env_value("EMAIL_HOST", "localhost")
@@ -244,6 +245,8 @@ elif DEFAULT_FILE_STORAGE == "storage.AWSS3Storage.AWSS3MediaStorage":
     AWS_LOCATION = MEDIA_ROOT
     if not urlparse(MEDIA_URL).hostname.endswith(".s3.amazonaws.com"):
         AWS_S3_CUSTOM_DOMAIN = urlparse(MEDIA_URL).hostname
+    AWS_CLOUDFRONT_KEY = get_env_value("AWS_CLOUDFRONT_KEY", "").encode('ascii')
+    AWS_CLOUDFRONT_KEY_ID = get_env_value("AWS_CLOUDFRONT_KEY_ID", "")
 
 
 # Default primary key field type
@@ -301,7 +304,7 @@ if SOCIAL_ACCOUNT_LIST:
         },
         "custom_gitlab": {
             "display_name": get_env_value("GITLAB_DISPLAY_NAME", "gitlab"),
-            "SCOPE": ["openid", "read_api", "read_user"],
+            "SCOPE": ["read_user"],
             "APP": {
                 "client_id": get_env_value("GITLAB_CLIENT_ID", ""),
                 "secret": get_env_value("GITLAB_CLIENT_SECRET", ""),

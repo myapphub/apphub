@@ -36,6 +36,12 @@ class AWSS3MediaStorage(S3Boto3Storage):
         obj.upload_fileobj(content, ExtraArgs=params, Config=self._transfer_config)  # noqa: E501
         return cleaned_name
 
+    def url(self, name, parameters=None, expire=None, http_method=None):
+        access_url = super().url(name, parameters, expire, http_method)
+        if settings.AWS_STORAGE_PUBLIC_READ:
+            return access_url.split("?")[0]
+        return access_url
+
     def request_upload_url(self, slug, filename):
         ext = get_file_extension(filename, "zip")
         name = str(timezone.make_aware(timezone.make_naive(timezone.now())))[:19]  # noqa: E501
