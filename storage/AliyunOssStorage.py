@@ -1,4 +1,3 @@
-import json
 import os.path
 import posixpath
 import random
@@ -8,18 +7,12 @@ import tempfile
 from datetime import datetime
 from urllib.parse import urlparse
 
+import oss2
 from django.conf import settings
 from django.core.files import File
 from django.core.files.storage import Storage
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
-
-try:
-    import oss2
-    from aliyunsdkcore import client
-    from aliyunsdksts.request.v20150401 import AssumeRoleRequest
-except:  # noqa: E722
-    pass
 
 from util.url import get_file_extension
 
@@ -165,66 +158,6 @@ class AliyunOssStorage(Storage):
             "expire_seconds": expire_seconds
         }
 
-    def request_upload(
-        self,
-        filename,
-        description,
-        commit_id,
-        build_type,
-        channel,
-        callback_url,
-        slug,
-        uploader
-    ):
-        key_prefix = os.path.join(self.key_prefix, "temp/upload", slug, uploader) + "/"
-        resource = "acs:oss:*:*:" + self.bucket_name + "/" + key_prefix + "*"
-        policy = {
-            "Version": "1",
-            "Statement": [
-                {"Action": ["oss:PutObject"], "Effect": "Allow", "Resource": [resource]}
-            ],
-        }
-        policy_text = json.dumps(policy).strip()
-        clt = client.AcsClient(
-            self.access_key_id, self.access_key_secret, self.region_id
-        )
-        req = AssumeRoleRequest.AssumeRoleRequest()
-        req.set_accept_format("json")
-        req.set_RoleArn(self.role_arn)
-        req.set_RoleSessionName(uploader)
-        req.set_DurationSeconds(3600)
-        req.set_Policy(policy_text)
-        body = clt.do_action_with_exception(req)
-        token = json.loads(oss2.to_unicode(body))
-        description = description.replace('"', '\\"')
-        str_list = [
-            '{"object":${object}, "description":"',
-            description,
-            '","commit_id":"',
-            commit_id,
-            '","build_type":"',
-            build_type,
-            '", "channel": "',
-            channel,
-            '"}'
-        ]
-        callback_body = "".join(str_list)
-        ret = {
-            "callback": {
-                "callback_url": callback_url,
-                "callback_body": callback_body,
-                "callback_body_type": "application/json",
-            },
-            "access_key_id": token["Credentials"]["AccessKeyId"],
-            "access_key_secret": token["Credentials"]["AccessKeySecret"],
-            "security_token": token["Credentials"]["SecurityToken"],
-            "endpoint": self.public_url,
-            "is_cname": False if self.public_url.endswith(".aliyuncs.com") else True,
-            "bucket": self.bucket_name,
-            "key_prefix": key_prefix,
-        }
-        return ret
-
 
 @deconstructible
 class AliyunOssMediaStorage(AliyunOssStorage):
@@ -236,6 +169,4 @@ class AliyunOssMediaStorage(AliyunOssStorage):
         self.bucket_name = settings.ALIYUN_OSS_BUCKET_NAME
         self.public_read = settings.ALIYUN_OSS_PUBLIC_READ
         self.key_prefix = settings.MEDIA_ROOT
-        self.role_arn = settings.ALIYUN_OSS_ROLE_ARN
-        self.region_id = settings.ALIYUN_OSS_REGION_ID
         super().__init__()

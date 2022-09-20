@@ -37,10 +37,3 @@ class AppHubSoialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         request.new_user = not sociallogin.is_existing
         return super().pre_social_login(request, sociallogin)
-
-    def is_auto_signup_allowed(self, request, sociallogin):
-        ret = super().is_auto_signup_allowed(request, sociallogin)
-        if not ret:
-            sociallogin.user.email = ""
-            sociallogin.email_addresses = []
-        return True

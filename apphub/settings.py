@@ -200,7 +200,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-FONT_FILE = get_env_value("FONT_FILE", "PingFang.ttc")
+FONT_FILE = get_env_value("FONT_FILE", "DejaVuSerif.ttf")
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -230,9 +230,6 @@ if DEFAULT_FILE_STORAGE == "storage.AliyunOssStorage.AliyunOssMediaStorage":
     ALIYUN_OSS_ACCESS_KEY_SECRET = get_env_value("ALIYUN_OSS_ACCESS_KEY_SECRET")
     ALIYUN_OSS_BUCKET_NAME = get_env_value("ALIYUN_OSS_BUCKET_NAME")
     ALIYUN_OSS_ENDPOINT = get_env_value("ALIYUN_OSS_ENDPOINT")
-    ALIYUN_OSS_KEY_PREFIX = get_env_value("ALIYUN_OSS_KEY_PREFIX", "")
-    ALIYUN_OSS_ROLE_ARN = get_env_value("ALIYUN_OSS_ROLE_ARN")
-    ALIYUN_OSS_REGION_ID = get_env_value("ALIYUN_OSS_REGION_ID")
     ALIYUN_OSS_PUBLIC_READ = get_env_value("ALIYUN_OSS_PUBLIC_READ", False)
 elif DEFAULT_FILE_STORAGE == "storage.AWSS3Storage.AWSS3MediaStorage":
     AWS_ACCESS_KEY_ID = get_env_value("AWS_STORAGE_ACCESS_KEY_ID")

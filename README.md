@@ -56,22 +56,16 @@
 
 ## Configuration
 
-[Configuration](apphub/local_settings.example.py)
+Copy the example configuration file from [apphub/local_settings.example.py](apphub/local_settings.example.py) to apphub/local_settings.py, or mount configuration file to apphub/local_settings.py if you deploy by docker. All settings in local_settings.example.py can be set by environment variables, too.
+
+For detail settings, see the [example file](apphub/local_settings.example.py).
+
 
 ## Deploy
 
-### Docker
+Deploy AppHub with [dashboard](https://github.com/myapphub/dashboard) and [nginx](https://github.com/myapphub/nginx) is a good choice.
 
-### Manual
-
-``` bash
-git clone https://github.com/myapphub/apphub.git
-cd apphub
-pip install -r requirements.txt
-uwsgi --ini apphub.uwsgi.ini
-```
-
-### With dashboard
+Check [project](https://github.com/myapphub/project) for full deployment.
 
 
 ## Community
