@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "AppHub API",
-    "description": "AppHub API",
+    "title": "AppHub",
+    "description": "🙋‍♀️ A self-hosted service that helps you distribute Android, iOS, macOS, tvOS, Linux, Windows apps, you can release builds to testers and public app stores.",
     "contact": {
       "email": "lsjustin89@gmail.com"
     },
@@ -29,6 +29,9 @@
     },
     {
       "name": "application"
+    },
+    {
+      "name": "upload"
     },
     {
       "name": "distribute"
@@ -3100,12 +3103,87 @@
         }
       }
     },
-    "/upload/request": {
+    "/upload/package": {
       "post": {
         "tags": [
-          "distribute"
+          "upload"
         ],
-        "summary": "Request upload url",
+        "summary": "Upload a package to the application",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Token: yourtoken"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PackageFileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "item created",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "format": "url"
+                },
+                "description": "the package"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/upload/package/request": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "Request upload package url",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Token: yourtoken"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3132,19 +3210,961 @@
         }
       }
     },
-    "/upload/record/{record_id}": {
+    "/upload/package/record/{record_id}": {
       "get": {
         "tags": [
-          "distribute"
+          "upload"
         ],
         "summary": "Get the upload record status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Token: yourtoken"
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "description": "The record id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "upload record status.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestPackageUpdateResponse"
+                  "$ref": "#/components/schemas/PackageUploadRecordResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "Update the upload record status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Token: yourtoken"
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "description": "The record id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "upload record status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageUploadRecordResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/upload/symbol/{package_id}": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "Upload a symbol file to the package",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Token: yourtoken"
+          },
+          {
+            "name": "package_id",
+            "in": "path",
+            "description": "The app's package id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/SymbolFileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "item created",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "format": "url"
+                },
+                "description": "the package"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/upload/symbol/request/{package_id}": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "Request upload symbol file url",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Token: yourtoken"
+          },
+          {
+            "name": "package_id",
+            "in": "path",
+            "description": "The app's package id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSymbolFileUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "upload url.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestSymbolFileUploadResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/upload/symbol/record/{record_id}": {
+      "get": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "Get the upload record status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Token: yourtoken"
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "description": "The record id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "upload record status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageUploadRecordResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "upload"
+        ],
+        "summary": "Update the upload record status",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Token: yourtoken"
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "description": "The record id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "upload record status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageUploadRecordResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/{type}/{namespace}/apps/{path}/packages/upload": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Upload a package to the application",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users", "orgs"
+              ]
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The user's username or org's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "The app's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PackageFileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "item created",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "format": "url"
+                },
+                "description": "the package"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/{type}/{namespace}/apps/{path}/packages/upload/request": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Request upload package url",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users", "orgs"
+              ]
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The user's username or org's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "The app's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPackageUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "upload url.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestPackageUploadResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/{type}/{namespace}/apps/{path}/packages/upload/record/{record_id}": {
+      "get": {
+        "tags": [
+          "upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get the upload record status",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users", "orgs"
+              ]
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The user's username or org's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "The app's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "description": "The record id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "upload record status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageUploadRecordResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update the upload record status",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users", "orgs"
+              ]
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The user's username or org's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "The app's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "description": "The record id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "upload record status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageUploadRecordResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/{type}/{namespace}/apps/{path}/packages/{package_id}/upload/symbol": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Upload a symbol file to the package",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users", "orgs"
+              ]
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The user's username or org's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "The app's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "package_id",
+            "in": "path",
+            "description": "The app's package id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/SymbolFileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "item created",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "format": "url"
+                },
+                "description": "the package"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/{type}/{namespace}/apps/{path}/packages/{package_id}/upload/symbol/request": {
+      "post": {
+        "tags": [
+          "upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Request upload symbol file url",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users", "orgs"
+              ]
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The user's username or org's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "The app's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "package_id",
+            "in": "path",
+            "description": "The app's package id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSymbolFileUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "upload url.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestSymbolFileUploadResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/{type}/{namespace}/apps/{path}/packages/upload/symbol/record/{record_id}": {
+      "get": {
+        "tags": [
+          "upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get the upload record status",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users", "orgs"
+              ]
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The user's username or org's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "The app's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "description": "The record id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "upload record status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageUploadRecordResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update the upload record status",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users", "orgs"
+              ]
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The user's username or org's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "The app's path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "description": "The record id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "upload record status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageUploadRecordResponse"
                 }
               }
             }
@@ -3514,184 +4534,6 @@
           },
           "304": {
             "description": "Not Modified."
-          }
-        }
-      }
-    },
-    "/{type}/{namespace}/apps/{path}/packages/upload_via_file": {
-      "post": {
-        "tags": [
-          "distribute"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Upload a package to the application",
-        "parameters": [
-          {
-            "name": "type",
-            "in": "path",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "users", "orgs"
-              ]
-            }
-          },
-          {
-            "name": "namespace",
-            "in": "path",
-            "description": "The user's username or org's path",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "path",
-            "in": "path",
-            "description": "The app's path",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/PackageFileRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "item created",
-            "headers": {
-              "Location": {
-                "schema": {
-                  "type": "string",
-                  "format": "url"
-                },
-                "description": "the package"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PackageResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "invalid input, object invalid"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        }
-      }
-    },
-    "/{type}/{namespace}/apps/{path}/packages/upload_via_url": {
-      "post": {
-        "tags": [
-          "distribute"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Upload a package via url",
-        "parameters": [
-          {
-            "name": "type",
-            "in": "path",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "users", "orgs"
-              ]
-            }
-          },
-          {
-            "name": "namespace",
-            "in": "path",
-            "description": "The user's username or org's path",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "path",
-            "in": "path",
-            "description": "The app's path",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PackageUrlRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "item created",
-            "headers": {
-              "Location": {
-                "schema": {
-                  "type": "string",
-                  "format": "url"
-                },
-                "description": "the package"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PackageResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "invalid input, object invalid"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
           }
         }
       }
@@ -5394,136 +6236,6 @@
         }
       }
     },
-    "/upload/file": {
-      "post": {
-        "tags": [
-          "distribute"
-        ],
-        "summary": "Upload a package to the application",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Authorization token",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "Token: yourtoken"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/PackageFileRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "item created",
-            "headers": {
-              "Location": {
-                "schema": {
-                  "type": "string",
-                  "format": "url"
-                },
-                "description": "the package"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PackageResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "invalid input, object invalid"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        }
-      }
-
-    },
-    "/aliyun/oss/callback/{uploader_type}/{uploader}/{slug}": {
-      "post": {
-        "tags": [
-          "distribute"
-        ],
-        "summary": "Aliyun oss callback",
-        "parameters": [
-          {
-            "name": "uploader_type",
-            "in": "path",
-            "description": "The uploader's type (user, token)",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string",
-              "enum": ["user", "token"]
-            }
-          },
-          {
-            "name": "uploader",
-            "in": "path",
-            "description": "The app's install slug",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "slug",
-            "in": "path",
-            "description": "The app's install slug",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AliyunOSSCallback"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "the callback response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PackageResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/stores/appstore/{country_code_alpha2}/{appstore_app_id}": {
       "get": {
         "tags": [
@@ -6298,6 +7010,17 @@
           },
           "commit_id": {
             "type": "string"
+          },
+          "build_type": {
+            "type": "string",
+            "default": "Debug",
+            "enum": [
+              "Debug",
+              "Release"
+            ]
+          },
+          "channel": {
+            "type": "string"
           }
         }
       },
@@ -6312,6 +7035,17 @@
             "type": "string"
           },
           "commit_id": {
+            "type": "string"
+          },
+          "build_type": {
+            "type": "string",
+            "default": "Debug",
+            "enum": [
+              "Debug",
+              "Release"
+            ]
+          },
+          "channel": {
             "type": "string"
           }
         }
@@ -6344,11 +7078,76 @@
       "RequestPackageUploadResponse": {
         "type": "object",
         "properties": {
-          "url": {
+          "upload_url": {
             "type": "string"
           },
-          "id": {
+          "file": {
+            "type": "string"
+          },
+          "record_id": {
             "type": "integer"
+          },
+          "storage": {
+            "type": "string",
+            "enum": [
+              "LocalFileSystem",
+              "AmazonAWSS3",
+              "AlibabaCloudOSS"
+            ]
+          }
+        }
+      },
+      "PackageUploadRecordResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "waiting",
+              "completed"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/PackageResponse"
+          }
+        }
+      },
+      "SymbolFileRequest": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "RequestSymbolFileUploadRequest": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string"
+          }
+        }
+      },
+      "RequestSymbolFileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "upload_url": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "record_id": {
+            "type": "integer"
+          },
+          "storage": {
+            "type": "string",
+            "enum": [
+              "LocalFileSystem",
+              "AmazonAWSS3",
+              "AlibabaCloudOSS"
+            ]
           }
         }
       },
@@ -6385,6 +7184,10 @@
             "type": "string"
           },
           "package_file": {
+            "type": "string",
+            "format": "url"
+          },
+          "symbol_file": {
             "type": "string",
             "format": "url"
           },

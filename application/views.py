@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from application.models import (AppAPIToken, UniversalApp, UniversalAppUser,
                                 Webhook)
 from application.permissions import (Namespace, UserRoleKind,
+                                     check_app_download_permission,
                                      check_app_manager_permission,
                                      check_app_view_permission)
 from application.serializers import (UniversalAppCreateSerializer,
@@ -586,3 +587,12 @@ class OrganizationUniversalAppList(APIView):
         location = reverse("org-app-detail", args=(path, request.user.username))
         response["Location"] = build_absolute_uri(location)
         return response
+
+
+class SlugAppDetail(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, slug):
+        app = check_app_download_permission(request.user, slug)
+        data = UniversalAppSerializer(app).data
+        return Response(data)

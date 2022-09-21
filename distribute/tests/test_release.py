@@ -54,6 +54,9 @@ class UserReleaseTest(DistributeBaseTest):
         self.assertDictEqual(r.json(), r2.json()[0])
         # self.assert_release_file_permission(release_id)
 
+        r = app_api.remove_package(package_id)
+        self.assert_status_400(r)
+
         r = app_api.create_release(release)
         self.assert_status_400(r)
 

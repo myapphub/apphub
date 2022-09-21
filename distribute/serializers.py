@@ -19,6 +19,7 @@ class PackageSerializer(serializers.ModelSerializer):
     os = serializers.SerializerMethodField()
     install_url = serializers.SerializerMethodField()
     package_file = serializers.SerializerMethodField()
+    symbol_file = serializers.SerializerMethodField()
     icon_file = serializers.SerializerMethodField()
     uploader = serializers.SerializerMethodField()
     short_commit_id = serializers.SerializerMethodField()
@@ -48,6 +49,11 @@ class PackageSerializer(serializers.ModelSerializer):
 
     def get_package_file(self, obj):
         return obj.package_file.url
+
+    def get_symbol_file(self, obj):
+        if not obj.symbol_file:
+            return ""
+        return obj.symbol_file.url
 
     def get_icon_file(self, obj):
         if not obj.icon_file:
@@ -80,6 +86,7 @@ class PackageSerializer(serializers.ModelSerializer):
             "name",
             "install_url",
             "package_file",
+            "symbol_file",
             "icon_file",
             "fingerprint",
             "version",
@@ -102,6 +109,7 @@ class PackageSerializer(serializers.ModelSerializer):
             "name",
             "install_url",
             "package_file",
+            "symbol_file",
             "icon_file",
             "fingerprint",
             "version",
@@ -143,6 +151,20 @@ class RequestUploadPackageSerializer(serializers.Serializer):
 
     class Meta:
         fields = ["filename", "description", "commit_id", "channel", "build_type"]
+
+
+class UploadSymbolFileSerializer(serializers.Serializer):
+    file = serializers.FileField()
+
+    class Meta:
+        fields = ["file"]
+
+
+class RequestUploadSymbolFileSerializer(serializers.Serializer):
+    filename = serializers.CharField(default="")
+
+    class Meta:
+        fields = ["filename"]
 
 
 class UploadAliyunOssPackageSerializer(serializers.Serializer):

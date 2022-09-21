@@ -265,7 +265,7 @@ def check_app_upload_permission(user, path, namespace):
 
 class UploadPackagePermission(BasePermission):
     def has_permission(self, request, view):
-        if request.method != "POST":
+        if request.method != "POST" and request.method != "PUT" and request.method != "GET":  # noqa: E501
             return False
         token = request.headers.get("Authorization", None)
         if token is None or not token.startswith("Token "):

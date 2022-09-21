@@ -62,3 +62,6 @@ class AWSS3MediaStorage(S3Boto3Storage):
             ExpiresIn=expire_seconds)
         response["file"] = name
         return response
+
+    def fast_open(self, name, mode="rb"):
+        return super._open(name, mode)

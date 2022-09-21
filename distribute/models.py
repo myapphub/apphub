@@ -14,7 +14,7 @@ from util.url import get_file_extension
 # from util.storage import make_directory, remove_directory, copy_file
 
 
-def distribute_package_path(instance, filename):
+def get_app_base_file_path(instance, filename, default_ext, file_type):
     universal_app = instance.app.universal_app
     os = ChoiceField(choices=Application.OperatingSystem.choices).to_representation(
         instance.app.os
@@ -26,40 +26,38 @@ def distribute_package_path(instance, filename):
         + "_"
         + str(instance.package_id)
         + "."
-        + get_file_extension(filename, "zip")
+        + get_file_extension(filename, default_ext)
     )
     if universal_app.org is not None:
-        return "orgs/{0}/apps/{1}/{2}/packages/{3}/{4}".format(
-            universal_app.org.id, universal_app.id, os, instance.short_version, name
+        return "orgs/{0}/apps/{1}/{2}/{3}/{4}/{5}".format(
+            universal_app.org.id,
+            universal_app.id,
+            os,
+            file_type,
+            instance.short_version,
+            name
         )
     else:
-        return "users/{0}/apps/{1}/{2}/packages/{3}/{4}".format(
-            universal_app.owner.id, universal_app.id, os, instance.short_version, name
+        return "users/{0}/apps/{1}/{2}/{3}/{4}/{5}".format(
+            universal_app.owner.id,
+            universal_app.id,
+            os,
+            file_type,
+            instance.short_version,
+            name
         )
+
+
+def distribute_package_path(instance, filename):
+    return get_app_base_file_path(instance, filename, "zip", "packages")
+
+
+def distribute_symbol_path(instance, filename):
+    return get_app_base_file_path(instance, filename, "zip", "symbols")
 
 
 def distribute_icon_path(instance, filename):
-    universal_app = instance.app.universal_app
-    os = ChoiceField(choices=Application.OperatingSystem.choices).to_representation(
-        instance.app.os
-    )
-    name = (
-        universal_app.path
-        + "_"
-        + instance.short_version
-        + "_"
-        + str(instance.package_id)
-        + "."
-        + get_file_extension(filename)
-    )
-    if instance.app.universal_app.org is not None:
-        return "orgs/{0}/apps/{1}/{2}/icons/{3}/{4}".format(
-            universal_app.org.id, universal_app.id, os, instance.short_version, name
-        )
-    else:
-        return "users/{0}/apps/{1}/{2}/icons/{3}/{4}".format(
-            universal_app.owner.id, universal_app.id, os, instance.short_version, name
-        )
+    return get_app_base_file_path(instance, filename, "png", "icons")
 
 
 class Package(models.Model):
@@ -75,7 +73,7 @@ class Package(models.Model):
         max_length=32, help_text="The app's name (extracted from the uploaded package)."
     )
     package_file = models.FileField(upload_to=distribute_package_path)
-    symbol_file = models.FileField(upload_to=distribute_package_path, blank=True)
+    symbol_file = models.FileField(upload_to=distribute_symbol_path, blank=True)
     icon_file = models.FileField(upload_to=distribute_icon_path)
     fingerprint = models.CharField(
         max_length=32, help_text="MD5 checksum of the package binary."

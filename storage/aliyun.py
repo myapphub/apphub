@@ -158,6 +158,15 @@ class AliyunOssStorage(Storage):
             "expire_seconds": expire_seconds
         }
 
+    def fast_open(self, name, mode="rb"):
+        if mode != "rb":
+            raise ValueError("OSS files can only be opened in read-only mode")
+
+        target_name = self._get_key_name(name)
+        tmpf = tempfile.TemporaryFile()
+
+        return AliyunOssFile(tmpf, target_name, self)
+
 
 @deconstructible
 class AliyunOssMediaStorage(AliyunOssStorage):

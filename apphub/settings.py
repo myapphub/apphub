@@ -217,21 +217,21 @@ STATICFILES_STORAGE = get_env_value(
 
 STORAGE_TYPE = get_env_value('STORAGE_TYPE', 'LocalFileSystem')
 STORAGE_MAP = {
-    "LocalFileSystem": "storage.NginxFileStorage.NginxPrivateFileStorage",
-    "AlibabaCloudOSS": "storage.AliyunOssStorage.AliyunOssMediaStorage",
-    "AmazonAWSS3": "storage.AWSS3Storage.AWSS3MediaStorage"
+    "LocalFileSystem": "storage.nginx.NginxPrivateFileStorage",
+    "AlibabaCloudOSS": "storage.aliyun.AliyunOssMediaStorage",
+    "AmazonAWSS3": "storage.s3.AWSS3MediaStorage"
 }
 
-DEFAULT_FILE_STORAGE = STORAGE_MAP.get(STORAGE_TYPE, "storage.NginxFileStorage.NginxPrivateFileStorage")  # noqa: E501
+DEFAULT_FILE_STORAGE = STORAGE_MAP.get(STORAGE_TYPE, "storage.nginx.NginxPrivateFileStorage")  # noqa: E501
 
 
-if DEFAULT_FILE_STORAGE == "storage.AliyunOssStorage.AliyunOssMediaStorage":
+if DEFAULT_FILE_STORAGE == "storage.aliyun.AliyunOssMediaStorage":
     ALIYUN_OSS_ACCESS_KEY_ID = get_env_value("ALIYUN_OSS_ACCESS_KEY_ID")
     ALIYUN_OSS_ACCESS_KEY_SECRET = get_env_value("ALIYUN_OSS_ACCESS_KEY_SECRET")
     ALIYUN_OSS_BUCKET_NAME = get_env_value("ALIYUN_OSS_BUCKET_NAME")
     ALIYUN_OSS_ENDPOINT = get_env_value("ALIYUN_OSS_ENDPOINT")
     ALIYUN_OSS_PUBLIC_READ = get_env_value("ALIYUN_OSS_PUBLIC_READ", False)
-elif DEFAULT_FILE_STORAGE == "storage.AWSS3Storage.AWSS3MediaStorage":
+elif DEFAULT_FILE_STORAGE == "storage.s3.AWSS3MediaStorage":
     AWS_ACCESS_KEY_ID = get_env_value("AWS_STORAGE_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = get_env_value("AWS_STORAGE_SECRET_ACCESS_KEY")
     AWS_S3_REGION_NAME = get_env_value("AWS_STORAGE_REGION_NAME")

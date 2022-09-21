@@ -229,7 +229,7 @@ class Api:
         def upload_package(self, file_path):
             with open(file_path, "rb") as fp:
                 data = {"file": fp}
-                url = self.base_path + "/packages/upload_via_file"
+                url = self.base_path + "/packages/upload"
                 return self.client.upload_post(url, data=data)
 
         def get_package_list(self, page=1, per_page=10):
@@ -383,7 +383,7 @@ class Api:
     def upload_package(self, file_path, token):
         with open(file_path, "rb") as fp:
             data = {"file": fp}
-            url = "/upload/file"
+            url = "/upload/package"
             return self.client.upload_post(url, data=data, token=token)
 
     def get_appstore_app_version(self, appstore_app_id, country_code_alpha2):

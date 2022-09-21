@@ -19,10 +19,12 @@ from django.urls import include, path, re_path
 
 # flake8: noqa
 from application.views import *
-from distribute.views import *
+from distribute.views.packages import *
+from distribute.views.releases import *
+from distribute.views.stores import *
+from distribute.views.upload import *
 from documentation.views import *
-from organization.views import (AuthenticatedUserOrganizationList,
-                                OrganizationList)
+from organization.views import *
 from user.views import MeUser, user_info
 
 urlpatterns = [
@@ -31,9 +33,24 @@ urlpatterns = [
     path("user/orgs", AuthenticatedUserOrganizationList.as_view()),
     path("user/", include("user.urls")),
     path("users/<username>", user_info),
-    path("upload/file", TokenAppPackageUpload.as_view()),
-    path("upload/request", RequestUploadPackage.as_view()),
-    path("upload/record/<record_id>", CheckUploadPackage.as_view()),
+    path("upload/package", TokenAppPackageUpload.as_view(), name="token-package-upload"),
+    path("upload/package/request", RequestUploadPackage.as_view()),
+    path("upload/package/record/<record_id>", CheckUploadPackage.as_view()),
+    path("upload/symbol/<int:package_id>", TokenAppSymbolUpload.as_view(), name="token-symbol-upload"),
+    path("upload/symbol/request/<int:package_id>", RequestUploadSymbolFile.as_view()),
+    path("upload/symbol/record/<int:record_id>", CheckUploadSymbolFile.as_view()),
+    path("users/<namespace>/apps/<path>/packages/upload", UserAppPackageUpload.as_view(), name="user-package-upload"),
+    path("users/<namespace>/apps/<path>/packages/upload/request", UserAppRequestUploadPackage.as_view()),
+    path("users/<namespace>/apps/<path>/packages/upload/record/<int:record_id>", UserAppCheckUploadPackage.as_view()),
+    path("orgs/<namespace>/apps/<path>/packages/upload", OrganizationAppPackageUpload.as_view(), name="org-package-upload"),
+    path("orgs/<namespace>/apps/<path>/packages/upload/request", OrganizationAppRequestUploadPackage.as_view()),
+    path("orgs/<namespace>/apps/<path>/packages/upload/record/<int:record_id>", OrganizationAppCheckUploadPackage.as_view()),
+    path("users/<namespace>/apps/<path>/packages/upload/symbol", UserAppSymbolUpload.as_view(), name="user-symbol-upload"),
+    path("users/<namespace>/apps/<path>/packages/upload/symbol/request", UserAppRequestUploadSymbolFile.as_view()),
+    path("users/<namespace>/apps/<path>/packages/upload/symbol/record/<int:record_id>", UserAppCheckUploadSymbolFile.as_view()),
+    path("orgs/<namespace>/apps/<path>/packages/upload/symbol", OrganizationAppSymbolUpload.as_view(), name="org-symbol-upload"),
+    path("orgs/<namespace>/apps/<path>/packages/upload/symbol/request", OrganizationAppRequestUploadSymbolFile.as_view()),
+    path("orgs/<namespace>/apps/<path>/packages/upload/symbol/record/<int:record_id>", OrganizationAppCheckUploadSymbolFile.as_view()),
     path("download/<slug>", SlugAppDetail.as_view()),
     path("download/<slug>/packages", SlugAppPackageList.as_view()),
     path("download/<slug>/packages/latest", SlugAppPackageLatest.as_view()),
@@ -82,10 +99,6 @@ urlpatterns = [
         name="org-app-webhook",
     ),
     path("orgs/<namespace>/apps/<path>/packages", OrganizationAppPackageList.as_view()),
-    path(
-        "orgs/<namespace>/apps/<path>/packages/upload_via_file",
-        OrganizationAppPackageUpload.as_view(),
-    ),
     path(
         "orgs/<namespace>/apps/<path>/packages/<int:package_id>",
         OrganizationAppPackageDetail.as_view(),
@@ -152,10 +165,6 @@ urlpatterns = [
         name="user-app-webhook",
     ),
     path("users/<namespace>/apps/<path>/packages", UserAppPackageList.as_view()),
-    path(
-        "users/<namespace>/apps/<path>/packages/upload_via_file",
-        UserAppPackageUpload.as_view(),
-    ),
     path(
         "users/<namespace>/apps/<path>/packages/<int:package_id>",
         UserAppPackageDetail.as_view(),
@@ -302,8 +311,8 @@ if settings.SOCIAL_ACCOUNT_LIST:
         )
 
 
-if settings.DEFAULT_FILE_STORAGE == "storage.NginxFileStorage.NginxPrivateFileStorage":
-    from storage.NginxFileStorage import nginx_media
+if settings.DEFAULT_FILE_STORAGE == "storage.nginx.NginxPrivateFileStorage":
+    from storage.nginx import nginx_media
 
     urlpatterns.append(
         re_path(r"^file/(?P<file>([^/]+/).*)$", nginx_media, name="file")
