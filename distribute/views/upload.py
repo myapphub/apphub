@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.db.models import Max
 from django.http import Http404
 from django.urls import reverse
 from rest_framework import permissions, serializers, status
@@ -46,9 +47,11 @@ def create_package(
         app = universal_app.android
     if app is None:
         raise serializers.ValidationError({"message": "OS not supported."})
-    package_id = (
-        Package.objects.filter(app__universal_app=universal_app).count() + 1
-    )
+    max_package_id = Package.objects.filter(app__universal_app=universal_app).aggregate(Max("package_id"))   # noqa: E501
+    max_package_id = max_package_id["package_id__max"]
+    if not max_package_id:
+        max_package_id = 0
+    package_id = max_package_id + 1
     instance = Package.objects.create(
         operator_object_id=operator_content_object.id,
         operator_content_object=operator_content_object,

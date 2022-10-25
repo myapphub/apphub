@@ -78,6 +78,35 @@ class UserUploadPackageTest(DistributeBaseTest):
     def test_apk_upload(self):
         self.assert_upload(self.apk_path)
 
+    def test_package_id(self):
+        file_path = self.apk_path
+        larry = self.create_and_get_user()
+        namespace = self.create_and_get_namespace(larry, larry.client.username)
+        app = self.chrome_app()
+        app["enable_os"] = ["iOS", "Android"]
+        namespace.create_app(app)
+        path = app["path"]
+
+        app_api = namespace.get_app_api(path)
+
+        r = app_api.upload_package(file_path)
+        self.assert_status_201(r)
+        package_id_1 = r.json()["package_id"]
+        self.assertEqual(package_id_1, 1)
+
+        r = app_api.upload_package(file_path)
+        self.assert_status_201(r)
+        package_id_2 = r.json()["package_id"]
+        self.assertEqual(package_id_2, 2)
+
+        r = app_api.remove_package(package_id_1)
+        self.assert_status_204(r)
+
+        r = app_api.upload_package(file_path)
+        self.assert_status_201(r)
+        package_id_3 = r.json()["package_id"]
+        self.assertEqual(package_id_3, 3)
+
 
 class OrganizationUploadPackageTest(UserUploadPackageTest):
     def create_and_get_namespace(self, api, namespace, visibility="Public"):

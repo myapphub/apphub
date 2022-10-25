@@ -1,5 +1,5 @@
 from django.core.signing import TimestampSigner
-# from django.db.models import Max
+from django.db.models import Max
 from django.urls import reverse
 from rest_framework import serializers
 
@@ -309,9 +309,11 @@ class ReleaseCreateSerializer(serializers.Serializer):
         if validated_data["enabled"]:
             package.make_public(install_slug)
 
-        release_id = (
-            Release.objects.filter(app__universal_app=universal_app).count() + 1
-        )
+        max_release_id = Release.objects.filter(app__universal_app=universal_app).aggregate(Max("release_id"))   # noqa: E501
+        max_release_id = max_release_id["release_id__max"]
+        if not max_release_id:
+            max_release_id = 0
+        release_id = max_release_id + 1
         app = package.app
         instance = Release.objects.create(
             app=app,
